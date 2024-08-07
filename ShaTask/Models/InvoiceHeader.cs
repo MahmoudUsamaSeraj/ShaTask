@@ -23,7 +23,7 @@ public partial class InvoiceHeader
 
     public int? CashierID { get; set; }
 
-    public int BranchID { get; set; }
+    public int? BranchID { get; set; }
 
     [ForeignKey("BranchID")]
     [InverseProperty("InvoiceHeaders")]
@@ -34,5 +34,5 @@ public partial class InvoiceHeader
     public virtual Cashier Cashier { get; set; }
 
     [InverseProperty("InvoiceHeader")]
-    public virtual ICollection<InvoiceDetail> InvoiceDetails { get; set; } = new List<InvoiceDetail>();
+    public virtual List<InvoiceDetail>? InvoiceDetails { get; set; } = new List<InvoiceDetail>();
 }

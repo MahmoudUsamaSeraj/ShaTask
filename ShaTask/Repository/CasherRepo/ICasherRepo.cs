@@ -10,5 +10,6 @@ namespace ShaTask.Repository.CasherRepo
         void remove(int id);
         void update(Cashier cashier);
         void save();
+        bool any(int id);
     }
 }

@@ -1,0 +1,129 @@
+﻿@model ShaTask.Models.InvoiceHeader
+
+@{
+    ViewData["Title"] = "Edit Invoice";
+}
+
+<h1>Edit Invoice</h1>
+
+<h4>Invoice</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <input type="hidden" asp-for="ID" />
+            <div class="form-group">
+                <label asp-for="CustomerName" class="control-label">Customer Name</label>
+                <input asp-for="CustomerName" class="form-control" />
+                <span asp-validation-for="CustomerName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Invoicedate" class="control-label">Date</label>
+                <input asp-for="Invoicedate" class="form-control" />
+                <span asp-validation-for="Invoicedate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CashierID" class="control-label">Cashier Name</label>
+                <select id="CashierID" asp-for="CashierID" class="form-control" asp-items="ViewBag.CashierID"></select>
+                <span asp-validation-for="CashierID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="BranchID" class="control-label">Branch Name</label>
+                <select id="BranchID" asp-for="BranchID" class="form-control" asp-items="ViewBag.BranchID"></select>
+                <span asp-validation-for="BranchID" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <h4>Items</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Item Count</th>
+                            <th>Item Price</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoiceItems">
+                        @for (int i = 0; i < Model.InvoiceDetails.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    <input name="items[@i].ID" type="hidden" value="@Model.InvoiceDetails[i].ID" />
+                                    <input name="items[@i].ItemName" value="@Model.InvoiceDetails[i].ItemName" class="form-control" />
+                                </td>
+                                <td>
+                                    <input name="items[@i].ItemCount" value="@Model.InvoiceDetails[i].ItemCount" class="form-control" />
+                                </td>
+                                <td>
+                                    <input name="items[@i].ItemPrice" value="@Model.InvoiceDetails[i].ItemPrice" class="form-control" />
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger" onclick="removeItem(this)">Remove</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-success" onclick="addItem()">Add Item</button>
+            </div>
+            <input type="submit" value="Save" class="btn btn-primary mt-2 mb-2" />
+        </form>
+        <a class ="btn btn-secondary" asp-action="Index">Back to List</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#CashierID').change(function () {
+                var cashierId = $(this).val();
+                
+                $.ajax({
+                    url: '@Url.Action("GetBranchByCashier", "Invoices")',
+                    data: { cashierId: cashierId },
+                    success: function (data) {
+                        console.log('Response Data:', data);
+                        if (data.success) {
+                            $('#BranchID').empty();
+                            $('#BranchID').append('<option value="' + data.branchID +'">' + data.branch + '</option>');
+                        } else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        
+                    }
+                });
+            });
+        });
+
+
+
+
+        let itemCount = @Model.InvoiceDetails.Count;
+        function addItem() {
+            let row = document.createElement("tr");
+            row.innerHTML = `
+                        <td>
+                            <input name="items[${itemCount}].ItemName" class="form-control" />
+                        </td>
+                        <td>
+                            <input name="items[${itemCount}].ItemCount" class="form-control" />
+                        </td>
+                        <td>
+                            <input name="items[${itemCount}].ItemPrice" class="form-control" />
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger" onclick="removeItem(this)">Remove</button>
+                        </td>`;
+            document.getElementById("invoiceItems").appendChild(row);
+            itemCount++;
+        }
+
+        function removeItem(button) {
+            button.closest("tr").remove();
+        }
+    </script>
+}
+

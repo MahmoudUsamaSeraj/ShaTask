@@ -15,7 +15,15 @@ namespace ShaTask.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            if (User.Identity.IsAuthenticated)
+            {
+                return View();
+            }
+            else
+            {
+
+                return RedirectToAction("Login", "Login");
+            }
         }
 
         public IActionResult Privacy()

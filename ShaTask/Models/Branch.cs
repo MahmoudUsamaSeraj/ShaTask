@@ -17,7 +17,7 @@ public partial class Branch
     [StringLength(200)]
     public string BranchName { get; set; }
 
-    public int CityID { get; set; }
+    public int? CityID { get; set; }
 
     [InverseProperty("Branch")]
     public virtual ICollection<Cashier> Cashiers { get; set; } = new List<Cashier>();

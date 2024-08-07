@@ -2,11 +2,13 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ShaTask.Models;
 
-public partial class ShaTaskContext : DbContext
+public partial class ShaTaskContext : IdentityDbContext<IdentityUser>
 {
     public ShaTaskContext()
     {
@@ -27,18 +29,33 @@ public partial class ShaTaskContext : DbContext
 
     public virtual DbSet<InvoiceHeader> InvoiceHeaders { get; set; }
 
-//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseSqlServer("Data Source=OZIL;Initial Catalog=ShaTask;Integrated Security=True");
+    //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+    //        => optionsBuilder.UseSqlServer("Data Source=OZIL;Initial Catalog=ShaTask;Integrated Security=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
+        var secutitySchema = "security";
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<IdentityUser>().ToTable("Users", secutitySchema);
+
+        modelBuilder.Entity<IdentityRole>().ToTable("Roles", secutitySchema);
+        modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRoles", secutitySchema);
+        modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims", secutitySchema);
+        modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaims", secutitySchema);
+        modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserTokens", secutitySchema);
+        modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogin", secutitySchema);
+
+
+
         modelBuilder.Entity<Branch>(entity =>
         {
             entity.Property(e => e.BranchName).HasDefaultValue("");
 
-            entity.HasOne(d => d.City).WithMany(p => p.Branches)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+            entity.HasOne(d => d.City)
+                .WithMany(p => p.Branches)
+                .OnDelete(DeleteBehavior.NoAction) // Change to Cascade if you want Branches deleted with City
                 .HasConstraintName("FK_Branches_Cities");
         });
 
@@ -46,8 +63,9 @@ public partial class ShaTaskContext : DbContext
         {
             entity.Property(e => e.CashierName).HasDefaultValue("");
 
-            entity.HasOne(d => d.Branch).WithMany(p => p.Cashiers)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+            entity.HasOne(d => d.Branch)
+                .WithMany(p => p.Cashiers)
+                .OnDelete(DeleteBehavior.NoAction) // Change to Cascade if you want Cashiers deleted with Branch
                 .HasConstraintName("FK_Cashier_Branches");
         });
 
@@ -60,8 +78,9 @@ public partial class ShaTaskContext : DbContext
         {
             entity.Property(e => e.ItemName).HasDefaultValue("");
 
-            entity.HasOne(d => d.InvoiceHeader).WithMany(p => p.InvoiceDetails)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+            entity.HasOne(d => d.InvoiceHeader)
+                .WithMany(p => p.InvoiceDetails)
+                .OnDelete(DeleteBehavior.Cascade) // Change to Cascade if you want InvoiceDetails deleted with InvoiceHeader
                 .HasConstraintName("FK_InvoiceDetails_InvoiceHeader");
         });
 
@@ -70,15 +89,20 @@ public partial class ShaTaskContext : DbContext
             entity.Property(e => e.CustomerName).HasDefaultValue("");
             entity.Property(e => e.Invoicedate).HasDefaultValueSql("(getdate())");
 
-            entity.HasOne(d => d.Branch).WithMany(p => p.InvoiceHeaders)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+            entity.HasOne(d => d.Branch)
+                .WithMany(p => p.InvoiceHeaders)
+                .OnDelete(DeleteBehavior.NoAction) // Set to Cascade if you want InvoiceHeaders deleted with Branch
                 .HasConstraintName("FK_InvoiceHeader_Branches");
 
-            entity.HasOne(d => d.Cashier).WithMany(p => p.InvoiceHeaders).HasConstraintName("FK_InvoiceHeader_Cashier");
+            entity.HasOne(d => d.Cashier)
+                .WithMany(p => p.InvoiceHeaders)
+                .OnDelete(DeleteBehavior.NoAction) // or Cascade based on your requirement
+                .HasConstraintName("FK_InvoiceHeader_Cashier");
         });
 
         OnModelCreatingPartial(modelBuilder);
     }
+
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

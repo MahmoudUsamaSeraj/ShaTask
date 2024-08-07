@@ -20,7 +20,7 @@ namespace ShaTask.Repository.BranchRepo
             return db.Branches.ToList();
         }
 
-        public Branch getById(int id)
+        public Branch getById(int? id)
         {
             return db.Branches.FirstOrDefault(b=>b.ID == id);
         }

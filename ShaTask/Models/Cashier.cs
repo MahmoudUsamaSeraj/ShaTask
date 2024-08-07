@@ -18,7 +18,7 @@ public partial class Cashier
     [StringLength(200)]
     public string CashierName { get; set; }
 
-    public int BranchID { get; set; }
+    public int? BranchID { get; set; }
 
     [ForeignKey("BranchID")]
     [InverseProperty("Cashiers")]

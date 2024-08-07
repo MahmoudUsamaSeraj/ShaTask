@@ -15,6 +15,13 @@ namespace ShaTask.Repository.CasherRepo
             db.Cashiers.Add( cashier );
         }
 
+        public bool any(int id)
+        {
+            return db.Cashiers.Any(e => e.ID == id);
+
+
+        }
+
         public List<Cashier> getAll()
         {
             return db.Cashiers.ToList();
@@ -22,7 +29,7 @@ namespace ShaTask.Repository.CasherRepo
 
         public Cashier getById(int id)
         {
-            return db.Cashiers.Find(id);
+            return db.Cashiers?.Find(id);
         }
 
         public void remove(int id)
